@@ -1,0 +1,549 @@
+basePath: /
+definitions:
+  models.AllUser:
+    properties:
+      avatar_path:
+        type: string
+      biography:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.Comment:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      post_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  models.CommentRequest:
+    properties:
+      content:
+        type: string
+    required:
+    - content
+    type: object
+  models.FeedPost:
+    properties:
+      author_avatar:
+        type: string
+      author_id:
+        type: integer
+      author_name:
+        type: string
+      comments:
+        items:
+          $ref: '#/definitions/models.Comment'
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      image_path:
+        type: string
+      like_count:
+        type: integer
+    type: object
+  models.Like:
+    properties:
+      id:
+        type: integer
+      liked_at:
+        type: string
+      post_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  models.LoginUser:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.Notifications:
+    properties:
+      action:
+        type: string
+      actor_avatar:
+        type: string
+      actor_id:
+        type: integer
+      actor_name:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_read:
+        type: boolean
+      post_id:
+        type: integer
+    type: object
+  models.Post:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      image_path:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.RegisterUser:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  models.User:
+    properties:
+      avatar_path:
+        type: string
+      biography:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  utils.ErrorResponse:
+    properties:
+      error:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for Social Media
+  title: Social Media API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to the system
+      parameters:
+      - description: Login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Login to the system
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with the provided data
+      parameters:
+      - description: Register User
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2PasswordBearer: []
+      summary: Register a new user
+      tags:
+      - auth
+  /feed:
+    get:
+      consumes:
+      - application/json
+      description: Get feed of a user
+      operationId: get-user-feed
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FeedPost'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user feed
+      tags:
+      - feed
+  /post:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a post with optional image and text content
+      operationId: create-post
+      parameters:
+      - description: Post content
+        in: formData
+        name: content
+        required: true
+        type: string
+      - description: Post image file
+        in: formData
+        name: image
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Post created successfully
+          schema:
+            $ref: '#/definitions/models.Post'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a post
+      tags:
+      - post
+  /post/{id}/comment:
+    post:
+      consumes:
+      - application/json
+      description: Add a comment to a post with the given content
+      operationId: add-comment
+      parameters:
+      - description: post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: comment request body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.CommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add a comment to a post
+      tags:
+      - post
+  /post/{id}/like:
+    post:
+      consumes:
+      - application/json
+      description: Like a post with user ID
+      operationId: like-post
+      parameters:
+      - description: post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Like'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Like a post
+      tags:
+      - post
+  /post/{id}/unlike:
+    delete:
+      consumes:
+      - application/json
+      description: Unlike a post with user ID
+      operationId: unlike-post
+      parameters:
+      - description: post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Like'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Unlike a post
+      tags:
+      - post
+  /user/:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AllUser'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all users
+      tags:
+      - user
+  /user/{id}/follow:
+    post:
+      description: Send a follow request to another user
+      operationId: follow-user
+      parameters:
+      - description: ID of the user to follow
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully following the user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid user ID / Cannot follow yourself / Already following
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Follow a user
+      tags:
+      - user
+  /user/{id}/unfollow:
+    delete:
+      description: Remove a follow relationship with another user
+      operationId: unfollow-user
+      parameters:
+      - description: ID of the user to unfollow
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Unfollowed successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid user ID / Not following this user
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Unfollow a user
+      tags:
+      - user
+  /user/notifications:
+    get:
+      description: Retrieve all notifications for the authenticated user
+      operationId: get-notifications
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns list of notifications or empty array
+          schema:
+            $ref: '#/definitions/models.Notifications'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user notifications
+      tags:
+      - user
+  /user/notifications/{id}:
+    patch:
+      description: Mark a specific notification as read for the authenticated user
+      operationId: read-notification
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Notification marked as read successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid notification ID
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Notification not found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Mark notification as read
+      tags:
+      - user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
