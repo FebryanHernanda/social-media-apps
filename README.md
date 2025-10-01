@@ -3,6 +3,30 @@
 A simple **Social Media Backend API** built with **Go** and **Gin framework**.  
 It supports user authentication, posts, likes, comments, follows, and notifications.
 
+## Design System 
+<img width="2644" height="860" alt="image" src="https://github.com/user-attachments/assets/444de218-52f1-4c85-a77f-8c2b2bbd758d" />
+
+#### Functional Requirements
+
+  - User Account Managements
+  - User Interactions (Post, Feed, Comment, and Social Relationships)
+  - User Discovery & Communication (Notification & etc)
+
+#### Non-Functional Requirements
+
+1. **Performance**
+    - Server response
+    - Optimize Query
+2. **Scalability**
+    - Handle +1k user
+    - Expand to 1k++
+3. **Reliability**
+    - Consistency data (Post, Like, Comment, etc)
+    - Error Handling
+4. **Availability**
+    - Server Availablity up > 95%
+    - Server downtime
+  
 ## 🔧 Tech Stack
 
 - [Go](https://go.dev/dl/) - Backend programming language
@@ -25,7 +49,6 @@ DBPORT=<your_database_port>
 
 # JWT Configuration
 JWT_SECRET=<your_secret_jwt>
-JWT_ISSUER=<your_jwt_issuer>
 
 # Redis Configuration
 RDB_HOST=<your_redis_host>
