@@ -26,12 +26,27 @@ func NewAuthHandler(repo *repositories.AuthRepository, jwtManager *utils.JWTMana
 	}
 }
 
+// @Summary Register a new user
+// @Description Register a new user with the provided data
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param req body models.RegisterUser true "Register User"
+// @Success 200 {object} models.User
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /auth/register [post]
+// @security OAuth2PasswordBearer
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	var req models.RegisterUser
 	if err := ctx.ShouldBind(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"error":   err.Error(),
+		})
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Success: false,
+			Error:   err.Error(),
 		})
 		return
 	}
@@ -62,6 +77,16 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	})
 }
 
+// @Summary Login to the system
+// @Description Login to the system
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body models.LoginUser true "Login credentials"
+// @Success 200 {string} string
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(ctx *gin.Context) {
 	var user models.LoginUser
 
