@@ -7,6 +7,15 @@ import (
 	"github.com/febryanhernanda/social-media-apps/internal/routers"
 )
 
+// @title Social Media API
+// @version 1.0
+// @description API for Social Media
+// @host localhost:8080
+// @BasePath /
+//
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	db, err := configs.InitDB()
 	if err != nil {
