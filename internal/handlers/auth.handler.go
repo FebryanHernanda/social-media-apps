@@ -40,10 +40,6 @@ func NewAuthHandler(repo *repositories.AuthRepository, jwtManager *utils.JWTMana
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	var req models.RegisterUser
 	if err := ctx.ShouldBind(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"error":   err.Error(),
-		})
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Success: false,
 			Error:   err.Error(),
